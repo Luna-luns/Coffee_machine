@@ -10,30 +10,33 @@ CAPPUCCINO_WATER = 200
 CAPPUCCINO_MILK = 100
 CAPPUCCINO_BEANS = 12
 CAPPUCCINO_COSTS = 6
-DEFAULT_WATER = 400
-DEFAULT_MILK = 540
-DEFAULT_BEANS = 120
-DEFAULT_DISPOSABLE_CUPS = 9
-DEFAULT_COST = 550
+water = 400
+milk = 540
+beans = 120
+disposable_cups = 9
+money_left = 550
 
 
 def print_coffee_machine_data() -> None:
 
-    print(f'The coffee machine has:\n{DEFAULT_WATER} ml of water\n{DEFAULT_MILK} ml of milk\n'
-          f'{DEFAULT_BEANS} g of coffee beans\n{DEFAULT_DISPOSABLE_CUPS} disposable cups\n${DEFAULT_COST} of money\n')
+    global water, milk, beans, disposable_cups, money_left
+
+    print(f'\nThe coffee machine has:\n{water} ml of water\n{milk} ml of milk\n'
+          f'{beans} g of coffee beans\n{disposable_cups} disposable cups\n${money_left} of money\n')
 
 
 def ask_for_action() -> str:
 
-    return input('Write action (buy, fill, take):').strip()
+    return input('Write action (buy, fill, take, remaining, exit):' + '\n').strip()
 
 
 def ask_for_coffee_type() -> str:
 
-    return input('What do you want to buy? 1 - espresso, 2 - latte, 3 - cappuccino:').strip()
+    return input('\n' + 'What do you want to buy? 1 - espresso, 2 - latte, 3 - cappuccino, back - to main menu:' + '\n').strip()
 
 
 def perform_actions(_action: str) -> None:
+
     if _action == 'buy':
 
         perform_action_buy()
@@ -46,77 +49,109 @@ def perform_actions(_action: str) -> None:
 
         perform_action_take()
 
+    if _action == 'remaining':
+
+        print_coffee_machine_data()
+
+    if _action == 'exit':
+
+        exit()
+
 
 def perform_action_buy() -> None:
-    coffee_type = int(ask_for_coffee_type())
-    water, milk, beans, disposable_cups, money_left = count_new_coffee_machine_data_buy(coffee_type)
 
-    print(f'\nThe coffee machine has:\n{water} ml of water\n{milk} ml of milk\n'
-          f'{beans} g of coffee beans\n{disposable_cups} disposable cups\n${money_left} of money')
+    coffee_type = ask_for_coffee_type()
+
+    if coffee_type == 'back':
+
+        return
+
+    else:
+
+        _water, _milk, _beans, _disposable_cups, _money_left = sort_coffee_machine_data_buy(coffee_type)
+
+        if _water >= 0 and _milk >= 0 and _beans >= 0 and _disposable_cups >= 0:
+
+            global water, milk, beans, disposable_cups, money_left
+
+            water, milk, beans, disposable_cups, money_left = _water, _milk, _beans, _disposable_cups, _money_left
+            print('I have enough resources, making you a coffee!' + '\n')
+
+        elif _water < 0 <= _milk and _beans >= 0 and _disposable_cups >= 0:
+
+            print('Sorry, not enough water!' + '\n')
+
+        elif _water >= 0 > _milk and _beans >= 0 and _disposable_cups >= 0:
+
+            print('Sorry, not enough milk!' + '\n')
+
+        elif _water >= 0 > _beans and _milk >= 0 and _disposable_cups >= 0:
+
+            print('Sorry, not enough beans!' + '\n')
+
+        elif _water >= 0 and _milk >= 0 and _disposable_cups < 0 <= _beans:
+
+            print('Sorry, not enough disposable_cups!' + '\n')
 
 
-def count_new_coffee_machine_data_buy(_coffee_type: int) -> list:
-    if _coffee_type == 1:
-        _water = DEFAULT_WATER - ESPRESSO_WATER
-        _milk = DEFAULT_MILK - ESPRESSO_MILK
-        _beans = DEFAULT_BEANS - ESPRESSO_BEANS
-        _disposable_cups = DEFAULT_DISPOSABLE_CUPS - 1
-        _money_left = DEFAULT_COST + ESPRESSO_COSTS
+def count_new_coffee_machine_data_buy(constant_water: int, constant_milk: int, constant_beans: int, constant_disposable_cups: int, constant_money_left: int, constant_costs: int) -> list:
 
-        return [_water, _milk, _beans, _disposable_cups, _money_left]
+    _water = water - constant_water
+    _milk = milk - constant_milk
+    _beans = beans - constant_beans
+    _disposable_cups = constant_disposable_cups - 1
+    _money_left = constant_money_left + constant_costs
 
-    if _coffee_type == 2:
-        _water = DEFAULT_WATER - LATTE_WATER
-        _milk = DEFAULT_MILK - LATTE_MILK
-        _beans = DEFAULT_BEANS - LATTE_BEANS
-        _disposable_cups = DEFAULT_DISPOSABLE_CUPS - 1
-        _money_left = DEFAULT_COST + LATTE_COSTS
+    return [_water, _milk, _beans, _disposable_cups, _money_left]
 
-        return [_water, _milk, _beans, _disposable_cups, _money_left]
 
-    if _coffee_type == 3:
-        _water = DEFAULT_WATER - CAPPUCCINO_WATER
-        _milk = DEFAULT_MILK - CAPPUCCINO_MILK
-        _beans = DEFAULT_BEANS - CAPPUCCINO_BEANS
-        _disposable_cups = DEFAULT_DISPOSABLE_CUPS - 1
-        _money_left = DEFAULT_COST + CAPPUCCINO_COSTS
+def sort_coffee_machine_data_buy(_coffee_type: str) -> list:
 
-        return [_water, _milk, _beans, _disposable_cups, _money_left]
+    if _coffee_type == '1':
+
+        return count_new_coffee_machine_data_buy(ESPRESSO_WATER, ESPRESSO_MILK, ESPRESSO_BEANS, disposable_cups, money_left, ESPRESSO_COSTS)
+
+    if _coffee_type == '2':
+
+        return count_new_coffee_machine_data_buy(LATTE_WATER, LATTE_MILK, LATTE_BEANS, disposable_cups, money_left, LATTE_COSTS)
+
+    if _coffee_type == '3':
+
+        return count_new_coffee_machine_data_buy(CAPPUCCINO_WATER, CAPPUCCINO_MILK, CAPPUCCINO_BEANS, disposable_cups, money_left, CAPPUCCINO_COSTS)
 
 
 def perform_action_fill() -> None:
-    water_to_add = int(input('Write how many ml of water you want to add:'))
-    milk_to_add = int(input('Write how many ml of milk you want to add:'))
-    beans_to_add = int(input('Write how many grams of coffee beans you want to add:'))
-    disposable_cups_to_add = int(input('Write how many disposable cups you want to add:'))
-    water, milk, beans, disposable_cups = count_new_coffee_machine_data_fill(water_to_add, milk_to_add, beans_to_add, disposable_cups_to_add)
 
-    print(f'\nThe coffee machine has:\n{water} ml of water\n{milk} ml of milk\n'
-          f'{beans} g of coffee beans\n{disposable_cups} disposable cups\n${DEFAULT_COST} of money')
+    water_to_add = int(input('\n' + 'Write how many ml of water you want to add:' + '\n'))
+    milk_to_add = int(input('Write how many ml of milk you want to add:' + '\n'))
+    beans_to_add = int(input('Write how many grams of coffee beans you want to add:' + '\n'))
+    disposable_cups_to_add = int(input('Write how many disposable cups you want to add:' + '\n'))
+    count_new_coffee_machine_data_fill(water_to_add, milk_to_add, beans_to_add, disposable_cups_to_add)
 
 
-def count_new_coffee_machine_data_fill(_water_to_add: int, _milk_to_add: int, _beans_to_add: int, _disposable_cups_to_add: int) -> list:
-    _water_to_add += DEFAULT_WATER
-    _milk_to_add += DEFAULT_MILK
-    _beans_to_add += DEFAULT_BEANS
-    _disposable_cups_to_add += DEFAULT_DISPOSABLE_CUPS
+def count_new_coffee_machine_data_fill(_water_to_add: int, _milk_to_add: int, _beans_to_add: int, _disposable_cups_to_add: int) -> None:
 
-    return [_water_to_add, _milk_to_add, _beans_to_add, _disposable_cups_to_add]
+    global water, milk, beans, disposable_cups
+
+    water += _water_to_add
+    milk += _milk_to_add
+    beans += _beans_to_add
+    disposable_cups += _disposable_cups_to_add
 
 
 def perform_action_take() -> None:
-    print(f'I gave you ${DEFAULT_COST}')
-    money_to_give = count_new_coffee_machine_data_take()
 
-    print(f'\nThe coffee machine has:\n{DEFAULT_WATER} ml of water\n{DEFAULT_MILK} ml of milk\n'
-          f'{DEFAULT_BEANS} g of coffee beans\n{DEFAULT_DISPOSABLE_CUPS} disposable cups\n${money_to_give} of money')
+    print(f'\nI gave you ${money_left}\n')
+    count_new_coffee_machine_data_take(money_left)
 
 
-def count_new_coffee_machine_data_take() -> int:
+def count_new_coffee_machine_data_take(_money_left: int) -> None:
 
-    return DEFAULT_COST - DEFAULT_COST
+    global money_left
+
+    money_left -= _money_left
 
 
-print_coffee_machine_data()
-action = ask_for_action()
-perform_actions(action), '\n'
+while True:
+    action = ask_for_action()
+    perform_actions(action)
